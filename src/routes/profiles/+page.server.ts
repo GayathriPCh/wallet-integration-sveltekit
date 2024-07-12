@@ -61,7 +61,7 @@ async function seed() {
   }
 }
 
-async function updateUser(user) {
+async function updateUser(user: { id: any; name: any; email: any }) {
     console.log('user', user);
     const db = createPool({ connectionString: POSTGRES_URL })
     const client = await db.connect();
@@ -101,7 +101,7 @@ export const actions = {
         console.log('api request errored');
         console.log(error)
         updateRes.error = true;
-        updateRes.messsage = error.messsage;
+        updateRes.messsage = (error as Error).message;
     }finally{
       return updateRes
     }
@@ -112,7 +112,7 @@ export const actions = {
     const db = createPool({ connectionString: POSTGRES_URL })
     const client = await db.connect();
 
-    const id = data.get('id');
+    const id = String(data.get('id'));
 
     const deleteUser = await client.sql`
     DELETE FROM names
@@ -130,10 +130,10 @@ export const actions = {
 		const name = data.get('name');
 
     const createUser = await client.sql`
-      INSERT INTO names (name, email)
-      VALUES (${name}, ${email})
-      ON CONFLICT (email) DO NOTHING;
-    `
+          INSERT INTO names (name, email)
+          VALUES (${String(name)}, ${String(email)})
+          ON CONFLICT (email) DO NOTHING;
+        `
     return { success: true };
 	}
 };
